@@ -1,21 +1,26 @@
+--Dragon
+RegisterNetEvent(Config.ScriptName..':recjob')
+AddEventHandler(Config.ScriptName..':recjob', function(p_job) 
+    playerjob = p_job 
+end)
+
 local inDelivery = false
 local modeltodelete
 local delete = false
 local deliveryPoint = nil
 local activeJob = nil
 local timer = 0
-
+local PromptGroupEndDelivery = GetRandomIntInRange(0, 0xffffff)
 -----blips
-
-Citizen.CreateThread( function()
-	for _, info in pairs(Config.Jobs) do
-		local blip = N_0x554d9d53f696d002(1664425300, info.startPoint.x, info.startPoint.y, info.startPoint.z)
-		SetBlipSprite(blip, -243818172, 1)
-		SetBlipScale(blip, 0.3)
-		Citizen.InvokeNative(0x9CB1A1623062F402, blip, _U('blip', info.stationName))
-	end
+Citizen.CreateThread( function() 
+    TriggerServerEvent(Config.ScriptName..':get_job')
+    for _, info in pairs(Config.Jobs) do
+        local blip = N_0x554d9d53f696d002(1664425300, info.startPoint.x, info.startPoint.y, info.startPoint.z)
+        SetBlipSprite(blip, -243818172, 1)
+        SetBlipScale(blip, 0.3)
+        Citizen.InvokeNative(0x9CB1A1623062F402, blip, _U('blip', info.stationName))
+    end
 end )
-
 --------------native alt key press---
 local DeliverPrompt
 local active = false
@@ -23,41 +28,57 @@ local pressed = false
 local inStartArea = false
 
 function SetupDeliverPrompt()
-	Citizen.CreateThread( function()
-		local str = 'Start Delivery Job'
-		DeliverPrompt = PromptRegisterBegin()
-		PromptSetControlAction(DeliverPrompt, 0xE8342FF2)
-		str = CreateVarString(10, 'LITERAL_STRING', str)
-		PromptSetText(DeliverPrompt, str)
-		PromptSetEnabled(DeliverPrompt, false)
-		PromptSetVisible(DeliverPrompt, false)
-		PromptSetHoldMode(DeliverPrompt, true)
-		PromptRegisterEnd(DeliverPrompt)
-	end )
+	local str = _U('DeliverPrompt')
+	DeliverPrompt = PromptRegisterBegin()
+	PromptSetControlAction(DeliverPrompt, 0xE8342FF2)
+	str = CreateVarString(10, 'LITERAL_STRING', str)
+	PromptSetText(DeliverPrompt, str)
+	PromptSetEnabled(DeliverPrompt, false)
+	PromptSetVisible(DeliverPrompt, false)
+	PromptSetHoldMode(DeliverPrompt, true)
+	PromptRegisterEnd(DeliverPrompt)
+end
+
+function SetupEndDeliverPrompt()
+	local str = _U('EndDeliverPrompt')
+	EndDeliverPrompt = PromptRegisterBegin()
+	PromptSetControlAction(EndDeliverPrompt, 0xD9D0E1C0)
+	str = CreateVarString(10, 'LITERAL_STRING', str)
+	PromptSetText(EndDeliverPrompt, str)
+	PromptSetEnabled(EndDeliverPrompt, true)
+	PromptSetVisible(EndDeliverPrompt, true)
+	PromptSetStandardMode(EndDeliverPrompt, 1)
+	PromptSetGroup(EndDeliverPrompt, PromptGroupEndDelivery)
+	Citizen.InvokeNative(0xC5F428EE08FA7F2C, EndDeliverPrompt, true)
+	PromptRegisterEnd(EndDeliverPrompt)
 end
 
 Citizen.CreateThread( function()
-	while true do
-		Citizen.Wait(0)
-		if inStartArea then
-			if not active then
-				PromptSetEnabled(DeliverPrompt, true)
-				PromptSetVisible(DeliverPrompt, true)
-				active = true
-			end
-			if PromptHasHoldModeCompleted(DeliverPrompt) then
-				PromptSetEnabled(DeliverPrompt, false)
-				PromptSetVisible(DeliverPrompt, false)
-				pressed = true
-				active = false
-				inStartArea = false
-			end
-		else
-			Citizen.Wait(500)
-		end
-	end
+    while true do
+        Citizen.Wait(0)
+        for job_key, job_name in pairs (Config.allowedjobs) do
+            if job_name == playerjob then
+                if inStartArea then
+                    if not active then
+                        PromptSetEnabled(DeliverPrompt, true)
+                        PromptSetVisible(DeliverPrompt, true)
+                        active = true
+                    end
+                    if PromptHasHoldModeCompleted(DeliverPrompt) then
+                        PromptSetEnabled(DeliverPrompt, false)
+                        PromptSetVisible(DeliverPrompt, false)
+                        pressed = true
+                        active = false
+                        inStartArea = false
+                    end    
+                else 
+                    print("Permission denied")
+                end 
+            end 
+        end 
+        Citizen.Wait(500) 
+    end
 end )
-
 
 Citizen.CreateThread( function()
 	SetupDeliverPrompt()
@@ -66,14 +87,13 @@ Citizen.CreateThread( function()
 		local isInMarker
 		for k, v in pairs(Config.Jobs) do
 			local betweencoords = #(GetEntityCoords(PlayerPedId()).xy - v.startPoint.xy)
-			isInMarker = betweencoords < 4
+			isInMarker = betweencoords < 1.5
 			if isInMarker then
 				activeJob = v
 				inStartArea = true
 				break
 			end
 		end
-
 		if not isInMarker and inStartArea then
 			inStartArea = false
 			if active then
@@ -84,31 +104,30 @@ Citizen.CreateThread( function()
 			end
 		end
 	end
-end )
+end)
 
-
-----------job start
+---job start
 Citizen.CreateThread( function()
 	while true do
 		Citizen.Wait(0)
 		if activeJob and pressed and not inDelivery then
+			DoScreenFadeOut(2000)
 			ResetMission()
 			timer = activeJob.timeLimit and activeJob.timeLimit or Config.TimeLimit
 			RemoveBlip(deliveryPoint)
 			deliveryPoint = N_0x554d9d53f696d002(1664425300, activeJob.endPoint.x, activeJob.endPoint.y, activeJob.endPoint.z)
 			SetBlipSprite(deliveryPoint, -44057202, 1)
 			Citizen.InvokeNative(0x9CB1A1623062F402, deliveryPoint, activeJob.destination)
-			PromptSetEnabled(DeliverPrompt, false)
-			PromptSetVisible(DeliverPrompt, false)
 			active = false
 			pressed = false
 			inDelivery = true
+			PromptSetEnabled(DeliverPrompt, false)
+			PromptSetVisible(DeliverPrompt, false)
 			TriggerServerEvent('vorp_DeliveryJob:server:startJob', activeJob.stationName)
 			wagon(activeJob.cartSpawn)
-			TriggerEvent("vorp:TipBottom", _U('punto_entrega', activeJob.destination), 10000)
-
+			DoScreenFadeIn(2000)
+			TriggerEvent("vorp:TipBottom", _U('delivery_point', activeJob.destination), 10000)
 			StartGpsMultiRoute(6, true, true)
-
 			-- Add the points
 			AddPointToGpsMultiRoute(activeJob.endPoint.x, activeJob.endPoint.y, activeJob.endPoint.z)
 
@@ -116,90 +135,97 @@ Citizen.CreateThread( function()
 			SetGpsMultiRouteRender(true)
 		end
 	end
-end )
+end)
 
------------job finish
+-- Your active end's function.
+function EndJob()
+    if inDelivery and activeJob then
+        inDelivery = false
+        RemoveBlip(deliveryPoint)
+        deliveryPoint = nil
+        deletewagon()
+        SetGpsMultiRouteRender(false)
+        TriggerServerEvent('vorp_DeliveryJob:server:endJob', activeJob.stationName)
+        activeJob = nil
+        DoScreenFadeIn(2000)
+        TriggerEvent("vorp:TipBottom", _U('job_ended'), 4000)
+    else
+        TriggerEvent("vorp:TipBottom", _U('no_active_job'), 4000)
+    end
+end
+
+-- Create a command handler for the "endjob" command.
+RegisterCommand("endjob", function()
+    EndJob()
+end, false)
+
+-- Optionally, add a chat suggestion for the "endjob" command.
+TriggerEvent('chat:addSuggestion', '/endjob', 'End your deliveryjob', {})
+
+---job finish
 Citizen.CreateThread( function()
+	SetupEndDeliverPrompt()
 	while true do
+		local sleep = true
 		Citizen.Wait(0)
 		if inDelivery and activeJob then
 			local playerPed = PlayerPedId()
 			local coords = GetEntityCoords(playerPed)
 			local b2 = #(coords.xy - activeJob.endPoint.xy)
-			if b2 <= 25 then
-				DrawTxt(_U('deliver', activeJob.destination), 0.50, 0.90, 0.5, 0.5, true, 255, 255, 255, 255, true)
-				if whenKeyJustPressed(keys["X"]) then
+			if b2 <= 10 then
+				sleep = false
+				local label = CreateVarString(10, 'LITERAL_STRING', _U('intime'))
+            	PromptSetActiveGroupThisFrame(PromptGroupEndDelivery, label)
+				if PromptHasStandardModeCompleted(EndDeliverPrompt) then
 					if IsPedInAnyVehicle(playerPed, false) then
 						local vehicle = GetVehiclePedIsIn(playerPed, false)
 						local model = GetEntityModel(vehicle)
-						if model == -824257932 then
+						TaskLeaveAnyVehicle(playerPed)
+						Wait(8000)
+						if model == -824257932 or model == -377157708 or model == 374792535 or model == -570691410 then
 							TriggerServerEvent('vorp_DeliveryJob:server:payout', activeJob.payout.cash, activeJob.payout.gold, activeJob.payout.experience)
-							TriggerEvent("vorp:TipBottom", _U('recompensa', activeJob.payout.cash, activeJob.payout.gold, activeJob.payout.experience), 4000)
+							TriggerEvent("vorp:TipBottom", _U('reward', activeJob.payout.cash, activeJob.payout.gold, activeJob.payout.experience), 4000)
 							inDelivery = false
 							RemoveBlip(deliveryPoint)
 							deletewagon()
 							SetGpsMultiRouteRender(false)
 							TriggerServerEvent('vorp_DeliveryJob:server:endJob', activeJob.stationName)
 							activeJob = nil
+							DoScreenFadeIn(2000)
 						else
-							TriggerEvent("vorp:TipBottom", _U('carro_incorrecto'), 4000)
+							TriggerEvent("vorp:TipBottom", _U('wrong_car'), 4000)
 						end
 					else
-						TriggerEvent("vorp:TipBottom", _U('subir_vehiculo'), 4000)
+						TriggerEvent("vorp:TipBottom", _U('go_on_vehicle'), 4000)
 					end
 				end
 			end
 		end
+		if sleep then
+			Wait(1000)
+		end
 	end
-end )
-
+end)
 
 Citizen.CreateThread( function()
+	local playerPed = PlayerPedId()
 	while true do
 		Citizen.Wait(1000)
 		if inDelivery and timer <= 0 then
 			inDelivery = false
+			TaskLeaveAnyVehicle(playerPed)
+			Wait(5000)
 			RemoveBlip(deliveryPoint)
 			deliveryPoint = nil
 			deletewagon()
 			SetGpsMultiRouteRender(false)
-			TriggerEvent("vorp:TipBottom", _U('entrega_fallida'), 4000)
+			TriggerServerEvent('vorp_DeliveryJob:server:removecash', activeJob.removecash.removec, activeJob.removecash.removeg, activeJob.removecash.removexp)
+			TriggerEvent("vorp:TipBottom", _U('failed_delivery', activeJob.removecash.removec, activeJob.removecash.removeg, activeJob.removecash.removexp), 8000)
 		else
 			timer = timer - 1000
 		end
 	end
-end )
-
-
-function DrawTxt(str, x, y, w, h, enableShadow, col1, col2, col3, a, centre)
-	local str = CreateVarString(10, "LITERAL_STRING", str)
-	SetTextScale(w, h)
-	SetTextColor(math.floor(col1), math.floor(col2), math.floor(col3), math.floor(a))
-	SetTextCentre(centre)
-	if enableShadow then SetTextDropshadow(1, 0, 0, 0, 255) end
-	Citizen.InvokeNative(0xADA9255D, 1);
-	DisplayText(str, x, y)
-end
-
-
-function wagon(wag)
-	local ped = PlayerPedId()
-	local car_start = GetEntityCoords(ped)
-	local car_name = "CART01"
-	local carHash = GetHashKey(car_name)
-	RequestModel(carHash)
-
-	while not HasModelLoaded(carHash) do
-		Citizen.Wait(0)
-	end
-
-	local car = CreateVehicle(carHash, wag.x, wag.y, wag.z, wag.w, true, false)
-	SetVehicleOnGroundProperly(car)
-	Wait(200)
-	SetPedIntoVehicle(ped, car, -1)
-	SetModelAsNoLongerNeeded(carHash)
-	modeltodelete = car
-end
+end)
 
 function deletewagon()
 	local entity = modeltodelete
@@ -219,13 +245,24 @@ function deletewagon()
 	modeltodelete = nil
 end
 
-function whenKeyJustPressed(key)
-	--- iscontorlpressed doesnt work in vehicles or some shit, this works
-	if Citizen.InvokeNative(0x580417101DDB492F, 0, key) then
-		return true
-	else
-		return false
+function wagon(wag)
+	local ped = PlayerPedId()
+	local car_start = GetEntityCoords(ped)
+	local car_random = { "CART01", "CART08", "CART04", "CART05" }
+	local car_name = car_random[math.random(1,#car_random)]
+	local carHash = GetHashKey(car_name)
+	RequestModel(carHash)
+
+	while not HasModelLoaded(carHash) do
+		Citizen.Wait(0)
 	end
+
+	local car = CreateVehicle(carHash, wag.x, wag.y, wag.z, wag.w, true, false)
+	SetVehicleOnGroundProperly(car)
+	Wait(200)
+	SetPedIntoVehicle(ped, car, -1)
+	SetModelAsNoLongerNeeded(carHash)
+	modeltodelete = car
 end
 
 -- prevents the native bugging if you restart script
@@ -240,7 +277,7 @@ AddEventHandler('onResourceStop', function(resourceName)
 		TriggerServerEvent('vorp_DeliveryJob:server:endJob', activeJob.stationName)
 		activeJob = nil
 	end
-end )
+end)
 
 function ResetMission()
 	RemoveBlip(deliveryPoint)
@@ -252,8 +289,6 @@ function ResetMission()
 		TriggerServerEvent('vorp_DeliveryJob:server:endJob', activeJob.stationName)
 	end
 end
-
-
 
 keys = {
 	-- Letters
@@ -323,12 +358,3 @@ keys = {
 	["LEFT"] = 0xA65EBAB4,
 	["RIGHT"] = 0xDEB34313,
 }
-
-
--- RegisterCommand('checkv', function(source, args)
---     local playerPed = PlayerPedId()
---     local vehicle = GetVehiclePedIsIn(playerPed, false)
---     local model = GetEntityModel(vehicle)
---     if model == -824257932 then
---     end
--- end)

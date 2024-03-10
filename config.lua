@@ -13,131 +13,156 @@ Config.ZoneSize = 2.0 -- Sizes of the zones
 Config.TimeLimit = 800000
 
 Config.Jobs = {
-	-- Valentine to MacFarland Ranch
-	{
-		stationName = "Valentine Station.",
-		destination = "MacFarland Ranch Station.",
-		startPoint = vector3(-179.51,627.02,114.09),
-		endPoint = vector3(-2333.03,-2418.96,62.00),
-		cartSpawn = vector4(-179.88,653.84,113.67,69.1),
-		payout =
-		{
-			cash = 24.75,
-			gold = 0,
-			experience = 100
-		}
-	},
-	-- MacFarland Ranch to Armadillo
-	{
-		stationName = "MacFarland Ranch Station.",
-		destination = "Armadillo Station.",
-		startPoint = vector3(-2324.89,-2406.17,63.85),
-		endPoint = vector3(-3686.81,-2627.33,-13.43),
-		cartSpawn = vector4(-2342.75,-2396.24,62.37,140.24),
-		payout =
-		{
-			cash = 6.0,
-			gold = 0,
-			experience = 100
-		}
-	},
-	-- Armadillo to Blackwater
-	{
-		stationName = "Armadillo Station.",
-		destination = "Blackwater Station.",
-		startPoint = vector3(-3672.91,-2600.51,-13.27),
-		endPoint = vector3(-799.72,-1323.52,43.69),
-		cartSpawn = vector4(-3673.27,-2611.24,-14.03,265.96),
-		payout =
-		{
-			cash = 18.25,
-			gold = 0,
-			experience = 100
-		}
-	},
-	-- Blackwater to Strawberry
-	{
-		stationName = "Blackwater Station.",
-		destination = "Strawberry Station.",
-		startPoint = vector3(-778.33,-1323.44,43.88),
-		endPoint = vector3(-1789.4,-376.68,159.1),
-		cartSpawn = vector4(-772.71,-1331.18,46.64,92.45),
-		timeLimit = 180000,
-		payout =
-		{
-			cash = 5.5,
-			gold = 0,
-			experience = 100
-		}
-	},
-	-- Strawberry to Saint Denis
-	{
-		stationName = "Strawberry Station.",
-		destination = "St. Denis Station.",
-		startPoint = vector3(-1775.49,-437.34,155.08),
-		endPoint = vector3(2496.60,-1233.28,49.23),
-		cartSpawn = vector4(-1778.50,-428.69,154.86,17.51),
-		payout =
-		{
-			cash = 21.25,
-			gold = 0,
-			experience = 100
-		}
-	},
-	-- Saint Denis to Annesburg
-	{
-		stationName = "St. Denis Station.",
-		destination = "Annesburg Station.",
-		startPoint = vector3(2530.21,-1202.29,53.73),
-		endPoint = vector3(2928.04,1303.65,44.48),
-		cartSpawn = vector4(2496.87,-1208.966,49.23,2.03),
-		payout =
-		{
-			cash = 17.5,
-			gold = 0,
-			experience = 100
-		}
-	},
-	-- Annesburg to Emerald Ranch
-	{
-		stationName = "Annesburg Station.",
-		destination = "Emerald Ranch Station.",
-		startPoint = vector3(2939.25,1288.65,44.65),
-		endPoint = vector3(1420.15,383.93,90.33),
-		cartSpawn = vector4(2923.16,1291.9,44.39,154.38),
-		payout =
-		{
-			cash = 9.5,
-			gold = 0,
-			experience = 100
-		}
-	},
-	-- Emerald Ranch to Wapiti Indian reservation
-	{
-		stationName = "Emerald Ranch Station.",
-		destination = "Wapiti Station.",
-		startPoint = vector3(1458.86,320.30,90.60),
-		endPoint = vector3(451.65,2234.67,247.61),
-		cartSpawn = vector4(1418.35,317.60,88.53,100.03),
-		payout =
-		{
-			cash = 15.0,
-			gold = 0,
-			experience = 100
-		}
-	},
-	-- Wapiti Indian Reservation to Valentine
-	{
-		stationName = "Wapiti Station.",
-		destination = "Valentine Station.",
-		startPoint = vector3(454.34,2213.01,246.18),
-		endPoint = vector3(-232.15,598.90,112.24),
-		cartSpawn = vector4(462.66,2213.19,246.31,200.28),
-		payout =
-		{
-			cash = 12.5,
-			gold = 0,
-			experience = 100
-		}
-	},
+    -- Valentine to Bacchus Station
+    {
+        stationName = "Valentine Station.",
+        destination = "Bacchus Station.",
+        startPoint = vector3(-177.862,647.063,113.584),
+        endPoint = vector3(570.52,1676.26,186.48),
+        cartSpawn = vector4(-179.88,653.84,113.67,69.1),
+        timeLimit = 600000,
+        payout =
+        {
+            cash = 2.30,
+            gold = 0,
+            experience = 0,
+        },
+        removecash =
+        {
+            removec = 1.15,
+            removeg = 0,
+            removeexp = 0,
+        }
+    },
+    -- Annesburg to Emerald Ranch
+    {
+        stationName = "Annesburg Station.",
+        destination = "Emerald Ranch.",
+        startPoint = vector3(2935.87,1277.88,44.85),
+        endPoint = vector3(1420.15,383.93,90.33),
+        cartSpawn = vector4(2923.16,1291.9,44.39,154.38),
+        timeLimit = 600000,
+        payout =
+        {
+            cash = 3.30,
+            gold = 0,
+            experience = 0,
+        },
+        removecash =
+        {
+            removec = 1.65,
+            removeg = 0,
+            removeexp = 0,
+        }
+    },
+    --Blackwater to Strawberry
+    {
+        stationName = "Blackwater Station.",
+        destination = "Strawberry Station.",
+        startPoint = vector3(-756.55,-1322.81,43.71),
+        endPoint = vector3(-1772.52,-385.93,156.76),
+        cartSpawn = vector4(-751.02,-1323.17,43.3,179.77),
+        timeLimit = 600000,
+        payout =
+        {
+            cash = 2.70,
+            gold = 0,
+            experience = 0,
+
+        },
+        removecash =
+        {
+            removec = 1.35,
+            removeg = 0,
+            removeexp = 0,
+        }
+    },
+    --MacFarland Ranch to Armadillo
+    {
+        stationName = "MacFarland Ranch.",
+        destination = "Armadillo Station.",
+        startPoint = vector3(-2324.89,-2406.17,63.85),
+        endPoint = vector3(-3722.79,-2621.77,-13.34),
+        cartSpawn = vector4(-2342.75,-2396.24,62.37,140.24),
+        timeLimit = 600000,
+        payout =
+        {
+            cash = 2.60,
+            gold = 0,
+            experience = 0,
+        },
+        removecash =
+        {
+            removec = 1.30,
+            removeg = 0,
+            removeexp = 0,
+        }
+    },
+    -- Strawberry to Saint Denis
+    {
+        stationName = "Strawberry Station.",
+        destination = "St. Denis Generalstore.",
+        startPoint = vector3(-1820.58,-428.23,160.19),
+        endPoint = vector3(2817.73,-1306.98,46.87),
+        cartSpawn = vector4(-1832.23,-425.27,160.63,169.04),
+        timeLimit = 1000000,
+        payout =
+        {
+            cash = 5.90,
+            gold = 0,
+            experience = 0,
+        },
+        removecash =
+        {
+            removec = 2.80,
+            removeg = 0,
+            removeexp = 0,
+        }
+    },
+    --Saint Denis to Van Horn !
+    {
+        stationName = "St. Denis Station.",
+        destination = "Van Horn Station.",
+        startPoint = vector3(2731.59,-1402.39,46.18),
+        endPoint = vector3(2967.07,573.59,-44.55),
+        cartSpawn = vector4(2732.65,-1414.17,45.15,113.52),
+        timeLimit = 600000,
+        payout =
+        {
+            cash = 2.90,
+            gold = 0,
+            experience = 0,
+        },
+        removecash =
+        {
+            removec = 1.45,
+            removeg = 0,
+            removeexp = 0,
+        }
+    },
+    --Rhodes Train Station to Blackwater Construction
+    {
+        stationName = "Rhodes Train Station.",
+        destination = "Blackwater Construction.",
+        startPoint = vector3(1231.27,-1299.57,77.39),
+        endPoint = vector3(-883.62,-1300.45,43.30),
+        cartSpawn = vector4(1233.86,-1269.87,75.51,-35.92),
+        timeLimit = 800000,
+        payout =
+        {
+            cash = 4.90,
+            gold = 0,
+            experience = 0,
+        },
+        removecash =
+        {
+            removec = 2.45,
+            removeg = 0,
+            removeexp = 0,
+        }
+    },
 }
+
+-- Additions
+Config.allowedjobs = {'police'}
+Config.ScriptName = GetCurrentResourceName()
